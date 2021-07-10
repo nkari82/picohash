@@ -26,7 +26,9 @@
 #define _PICOHASH_BIG_ENDIAN
 #endif
 #else               // ! defined __LITTLE_ENDIAN__
+#if __has_include("endian.h")
 #include <endian.h> // machine/endian.h
+#endif
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define _PICOHASH_BIG_ENDIAN
 #endif
@@ -158,7 +160,7 @@ static const void *_picohash_md5_body(_picohash_md5_ctx_t *ctx, const void *data
     uint_fast32_t a, b, c, d;
     uint_fast32_t saved_a, saved_b, saved_c, saved_d;
 
-    ptr = data;
+    ptr = (const unsigned char*)data;
 
     a = ctx->a;
     b = ctx->b;
@@ -306,7 +308,7 @@ inline void _picohash_md5_update(_picohash_md5_ctx_t *ctx, const void *data, siz
 
 inline void _picohash_md5_final(_picohash_md5_ctx_t *ctx, void *_digest)
 {
-    unsigned char *digest = _digest;
+    unsigned char *digest = (unsigned char *)_digest;
     unsigned long used, free;
 
     used = ctx->lo & 0x3f;
@@ -432,7 +434,7 @@ inline void _picohash_sha1_init(_picohash_sha1_ctx_t *s)
 
 inline void _picohash_sha1_update(_picohash_sha1_ctx_t *s, const void *_data, size_t len)
 {
-    const uint8_t *data = _data;
+    const uint8_t *data = (const uint8_t *)_data;
     for (; len != 0; --len) {
         ++s->byteCount;
         _picohash_sha1_add_uncounted(s, *data++);
@@ -532,7 +534,7 @@ static inline void _picohash_sha256_compress(_picohash_sha256_ctx_t *ctx, unsign
 
 static inline void _picohash_sha256_do_final(_picohash_sha256_ctx_t *ctx, void *digest, size_t len)
 {
-    unsigned char *out = digest;
+    unsigned char *out = (unsigned char *)digest;
     size_t i;
 
     /* increase the length of the message */
@@ -588,7 +590,7 @@ inline void _picohash_sha256_init(_picohash_sha256_ctx_t *ctx)
 
 inline void _picohash_sha256_update(_picohash_sha256_ctx_t *ctx, const void *data, size_t len)
 {
-    const unsigned char *in = data;
+    const unsigned char *in = (const unsigned char *)data;
     size_t n;
 
     while (len > 0) {
